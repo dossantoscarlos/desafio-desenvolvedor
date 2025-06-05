@@ -41,9 +41,19 @@ class UploadController extends Controller
 
         $file = $request->file('file');
 
-        Upload::upload_file($file);
+        try {
+            Upload::upload_file($file);
+        } catch (\Exception $e) {
+            Log::error("Error hash: ", [ $e->getMessage() ]);
 
-        return response()->json(["message" => "upload com sucesso"], 200);
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 400);
+        }
+
+        return response()->json([
+            "message" => "upload com sucesso"
+        ], 200);
     }
 
     /**
