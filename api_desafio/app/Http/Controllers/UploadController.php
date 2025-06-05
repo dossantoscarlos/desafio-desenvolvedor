@@ -30,8 +30,8 @@ class UploadController extends Controller
     public function store(StoreUploadRequest $request): JsonResponse
     {
 
-        Log::debug(ini_get('upload_max_filesize'), []);
-        Log::debug(ini_get('post_max_size'), []);
+        // Log::debug(ini_get('upload_max_filesize'), []);
+        // Log::debug(ini_get('post_max_size'), []);
 
         if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
             return response()

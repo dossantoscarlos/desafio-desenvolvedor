@@ -22,7 +22,7 @@ class StoreUploadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => 'required|file|mimes:csv,xls,xlsx|max:102048',
+            'file' => 'required|file|mimes:csv,xls,xlsx|max:152400',
         ];
     }
 }
