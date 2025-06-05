@@ -83,8 +83,22 @@ class UploadController extends Controller
      */
     public function destroy(Upload $upload) : JsonResponse
     {
-        $upload = Upload::find($upload->id);
-        $upload->delete();
+        $model = Upload::find($upload->id);
+
+        // Log::info("Upload model: (destroy) ", [ $upload ]);
+
+        // Log::info("Model data banco", [ $model ]);
+
+
+        if (empty($model)) {
+            return response()->json([
+                    "message"=> "Arquivo inexistente",
+                ], 
+                Response::HTTP_FOUND
+            );
+        } 
+        
+        $model->delete();
 
         return response()->json(null, 204);
     }
