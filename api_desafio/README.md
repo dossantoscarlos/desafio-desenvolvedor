@@ -1,61 +1,194 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# API de Upload e Processamento de Arquivos
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Esta API permite o upload e processamento de arquivos CSV e XLSX, com validação de duplicidade através de hash e processamento assíncrono dos dados.
 
-## About Laravel
+## Requisitos
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.1 ou superior
+- Composer
+- MySQL/PostgreSQL
+- Laravel 10.x
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Instalação
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. Clone o repositório
+```bash
+git clone [url-do-repositorio]
+```
 
-## Learning Laravel
+2. Instale as dependências
+```bash
+composer install
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+3. Configure o arquivo .env
+```bash
+cp .env.example .env
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+4. Configure as variáveis de ambiente no .env:
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=seu_banco
+DB_USERNAME=seu_usuario
+DB_PASSWORD=sua_senha
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+QUEUE_CONNECTION=database
+```
 
-## Laravel Sponsors
+5. Execute as migrations
+```bash
+php artisan migrate
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+6. Crie o link simbólico para storage
+```bash
+php artisan storage:link
+```
 
-### Premium Partners
+7. Inicie o worker para processamento de filas
+```bash
+php artisan queue:work 
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+ou (para ambiente de desenvolvimento rodando o servidor do laravel o pail e o work numa unica chamada vantagem de poder acompanhar o log em tempo real) 
 
-## Contributing
+```bash
+composer run dev
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Estrutura do Projeto
 
-## Code of Conduct
+### Models
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- `Upload`: Gerencia o upload de arquivos
+  - Validação de duplicidade via hash SHA256
+  - Armazenamento em disco local
+  - Dispara job de processamento
 
-## Security Vulnerabilities
+- `ConsolidateFile`: Processa e armazena os dados dos arquivos
+  - Campos: RptDt, TckrSymb, MktNm, SctyCtgyNm, ISIN, CrpnNm
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Jobs
 
-## License
+- `ProcessDataConsolidateFile`: Processa arquivos de forma assíncrona
+  - Suporte para CSV e XLSX
+  - Utiliza OpenSpout para leitura eficiente
+  - Timeout configurável (padrão: 10 minutos)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Controllers
+
+- `UploadController`: Endpoints para gerenciamento de uploads
+  - POST /api/v1/uploads: Upload de arquivo
+  - GET /api/v1/uploads: Lista uploads
+  - DELETE /api/v1/uploads/{id}: Remove upload
+
+- `ConsolidateFileController`: Endpoints para dados consolidados
+  - GET /api/v1/consolidate: Lista dados consolidados
+
+## Endpoints da API
+
+### Upload de Arquivo
+```http
+POST /api/v1/uploads
+Content-Type: multipart/form-data
+
+file: [arquivo]
+```
+
+Resposta (200):
+```json
+{
+    "message": "upload com sucesso"
+}
+```
+
+### Listar Uploads
+```http
+GET /api/v1/uploads
+```
+
+Resposta (200):
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "file_path": "uploads/arquivo.csv",
+            "name_file": "arquivo.csv",
+            "date_upload": "2024-03-14",
+            "hash_file": "hash123..."
+        }
+    ],
+    "current_page": 1,
+    "per_page": 50
+}
+```
+
+### Listar Dados Consolidados
+```http
+GET /api/v1/consolidate
+```
+
+Resposta (200):
+```json
+{
+    "data": [
+        {
+            "RptDt": "2024-03-14",
+            "TckrSymb": "PETR4",
+            "MktNm": "B3",
+            "SctyCtgyNm": "Ações",
+            "ISIN": "BRPETRACNPR6",
+            "CrpnNm": "Petrobras"
+        }
+    ],
+    "current_page": 1,
+    "per_page": 50
+}
+```
+
+## Processamento de Arquivos
+
+1. O arquivo é recebido via API
+2. É gerado um hash SHA256 para verificar duplicidade
+3. O arquivo é salvo em storage/app/uploads
+4. Um job é disparado para processamento assíncrono
+5. O job lê o arquivo usando OpenSpout
+6. Os dados são processados e salvos na tabela consolidate_files
+
+## Validações
+
+- Tipos de arquivo permitidos: CSV, XLS, XLSX
+- Tamanho máximo: 150MB
+- Verificação de duplicidade via hash
+- Validação de estrutura do arquivo
+
+## Logs
+
+Os logs são armazenados em `storage/logs/laravel.log` e incluem:
+- Processamento de arquivos
+- Erros de upload
+- Processamento de jobs
+- Validações
+
+## Segurança
+
+- Validação de tipos de arquivo
+- Verificação de duplicidade
+- Processamento assíncrono
+- Timeout configurável para jobs
+
+## Manutenção
+
+Para limpar jobs antigos:
+```bash
+php artisan queue:prune
+```
+
+Para reiniciar o worker:
+```bash
+php artisan queue:restart
+```

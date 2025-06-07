@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Adapters\ProcessDataFile;
+use App\Jobs\ProcessDataConsolidateFile;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +22,5 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
     }
 }

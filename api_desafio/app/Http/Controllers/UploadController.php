@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUploadRequest;
-use App\Http\Requests\UpdateUploadRequest;
 use App\Models\Upload;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Log;
 
@@ -17,11 +17,36 @@ class UploadController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index() : JsonResponse
+    public function index(Request $request) : JsonResponse
     {
-        $uploads = Upload::paginate(50, ['*'], 'page', null);
 
-        return response()->json($uploads);
+        $validated = $request->validate([
+            'date_upload'     => 'nullable|date_format:Y-m-d',
+            'name_file'       => 'nullable|string',
+        ]);
+    
+        if (empty($validated['date_upload']) && empty($validated['name_file'])) {
+            $result = Upload::paginate(50, ['*'], 'page', null);
+            return response()->json($result, Response::HTTP_OK);
+        }
+
+        $query = Upload::query();
+    
+        if (!empty($validated['name_file'])) {
+            $query->where('name_file', mb_strtolower($validated['name_file']));
+        }
+    
+        if (!empty($validated['date_upload'])) {
+            $query->where('date_upload', $validated['date_upload']);
+        }
+    
+        $results = $query->get();
+    
+        if ($results->isEmpty()) {
+            return response()->json(['message' => 'Not Found'], Response::HTTP_NOT_FOUND);
+        }
+        
+        return response()->json($results, Response::HTTP_OK);
     }
 
     /**
@@ -29,9 +54,6 @@ class UploadController extends Controller
      */
     public function store(StoreUploadRequest $request): JsonResponse
     {
-
-        // Log::debug(ini_get('upload_max_filesize'), []);
-        // Log::debug(ini_get('post_max_size'), []);
 
         if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
             return response()
@@ -57,38 +79,11 @@ class UploadController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Upload $upload): JsonResponse
-    {
-        $upload = Upload::find($upload->id);
-
-        return response()->json($upload);
-    }
-
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateUploadRequest $request, Upload $upload): JsonResponse    
-    {
-        $upload = Upload::find($upload->id);
-        $upload->update($request->all());
-
-        return response()->json($upload);
-    }
-
-    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Upload $upload) : JsonResponse
     {
         $model = Upload::find($upload->id);
-
-        // Log::info("Upload model: (destroy) ", [ $upload ]);
-
-        // Log::info("Model data banco", [ $model ]);
-
 
         if (empty($model)) {
             return response()->json([

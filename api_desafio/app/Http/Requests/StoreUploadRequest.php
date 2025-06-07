@@ -11,7 +11,7 @@ class StoreUploadRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return auth('sanctum')->check();
     }
 
     /**
@@ -22,7 +22,7 @@ class StoreUploadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => 'required|file|mimes:csv,xls,xlsx|max:152400',
+            'file' => 'required|file|mimes:csv,xlsx|max:152400',
         ];
     }
 }

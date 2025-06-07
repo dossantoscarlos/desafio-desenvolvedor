@@ -3,6 +3,7 @@ declare(strict_types= 1);
 
 namespace App\Models;
 
+use App\Jobs\ProcessDataConsolidateFile;
 use ErrorException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +24,7 @@ class Upload extends Model
         'name_file',
         'date_upload',
         'hash_file',
+        'extension_file'
     ];
     public static function upload_file(UploadedFile $file) : void 
     {
@@ -34,16 +36,27 @@ class Upload extends Model
 
         if (!$result->isEmpty()) {
             $store = Storage::disk('local')->delete(strval($path));
-            Log::debug("deletado arquivo", [$store]);
             throw new ErrorException('Arquivo existente');
         }
 
+        $mimeType = $file->getMimeType();
+
+        $listMimeType= [
+            'text/csv' => 'csv',
+            'application/vnd.ms-excel' => 'xls',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'=> 'xlsx'
+        ];
+
+        $name_file = explode(".", $file->getClientOriginalName());
+
         self::create([
             'file_path' => $path,
-            'name_file' => $file->getClientOriginalName(),
+            'name_file' => mb_strtolower($name_file[0]),
             'date_upload'=> now()->format('Y-m-d'),
-            'hash_file' => $hash
+            'hash_file' => $hash,
+            'extension_file' => $listMimeType[$mimeType],
         ]);
 
+        ProcessDataConsolidateFile::dispatch($path, $listMimeType[$mimeType]);
     }
 }

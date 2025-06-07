@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('uploads', function (Blueprint $table) {
+        Schema::create('consolidate_files', function (Blueprint $table) {
             $table->id();
-            $table->string('file_path');
-            $table->string('date_upload');
-            $table->string('name_file');
-            $table->string('extension_file');
-            $table->string('hash_file')->unique();
+            $table->string('RptDt');
+            $table->string('TckrSymb');
+            $table->string('MktNm');
+            $table->string('SctyCtgyNm');
+            $table->string('ISIN');
+            $table->string('CrpnNm');
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('uploads');
+        Schema::dropIfExists('consolidate_files');
     }
 };
