@@ -59,6 +59,99 @@ ou (para ambiente de desenvolvimento rodando o servidor do laravel o pail e o wo
 composer run dev
 ```
 
+## Documentação da API (Swagger)
+
+A API possui documentação completa usando Swagger/OpenAPI. Para acessar:
+
+### Acesso à Documentação
+
+1. **Ambiente Local (Desenvolvimento)**
+   ```bash
+   # Inicie o servidor Laravel
+   php artisan serve
+   
+   # Acesse a documentação em:
+   http://localhost:8000/api/documentation
+   ```
+
+2. **Ambiente Docker**
+   ```bash
+   # Inicie os containers
+   docker-compose up -d
+   
+   # Acesse a documentação em:
+   http://localhost/api/documentation
+   ```
+
+3. **Acesso Direto**
+   - A raiz do projeto (`/`) redireciona automaticamente para a documentação
+   - URLs alternativas:
+     - `/api/documentation`
+
+**Geração da Documentação**
+  ```bash
+   # Gera a documentação inicial
+   php artisan l5-swagger:generate
+   
+   # Atualiza a documentação após alterações
+   php artisan l5-swagger:generate
+   ```
+
+
+### Recursos da Documentação
+
+- **Interface Interativa**: Teste os endpoints diretamente pelo navegador
+- **Modelos de Dados**: Visualize a estrutura dos dados
+- **Exemplos de Requisição/Resposta**: Veja exemplos de uso
+- **Autenticação**: Documentação dos endpoints protegidos
+
+### Endpoints Documentados
+
+#### Uploads
+- `GET /api/v1/uploads`: Lista todos os uploads
+- `POST /api/v1/uploads`: Realiza upload de arquivo
+- `DELETE /api/v1/uploads/{id}`: Remove um upload
+
+#### Consolidação
+- `GET /api/v1/consolidate`: Lista dados consolidados
+
+### Modelos Documentados
+
+#### Upload
+```json
+{
+    "id": "integer",
+    "file_path": "string",
+    "name_file": "string",
+    "date_upload": "date",
+    "hash_file": "string",
+    "created_at": "datetime",
+    "updated_at": "datetime"
+}
+```
+
+#### ConsolidateFile
+```json
+{
+    "id": "integer",
+    "RptDt": "date",
+    "TckrSymb": "string",
+    "MktNm": "string",
+    "SctyCtgyNm": "string",
+    "ISIN": "string",
+    "CrpnNm": "string",
+    "created_at": "datetime",
+    "updated_at": "datetime"
+}
+```
+
+### Atualizando a Documentação
+
+Após fazer alterações nos controllers ou modelos, gere a documentação atualizada:
+```bash
+php artisan l5-swagger:generate
+```
+
 ## Estrutura do Projeto
 
 ### Models
