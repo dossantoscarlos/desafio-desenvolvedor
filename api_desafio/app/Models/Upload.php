@@ -11,6 +11,20 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @OA\Schema(
+ *     schema="Upload",
+ *     title="Upload",
+ *     description="Modelo para gerenciamento de uploads de arquivos",
+ *     @OA\Property(property="id", type="integer", format="int64", description="ID único do upload"),
+ *     @OA\Property(property="file_path", type="string", description="Caminho do arquivo no storage"),
+ *     @OA\Property(property="name_file", type="string", description="Nome original do arquivo"),
+ *     @OA\Property(property="date_upload", type="string", format="date", description="Data do upload"),
+ *     @OA\Property(property="hash_file", type="string", description="Hash SHA256 do arquivo para verificação de duplicidade"),
+ *     @OA\Property(property="created_at", type="string", format="date-time", description="Data de criação do registro"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time", description="Data da última atualização do registro")
+ * )
+ */
 class Upload extends Model
 {
     /** @use HasFactory<\Database\Factories\UploadFactory> */
@@ -26,9 +40,16 @@ class Upload extends Model
         'hash_file',
         'extension_file'
     ];
+
+    /**
+     * Realiza o upload de um arquivo
+     * 
+     * @param UploadedFile $file Arquivo a ser enviado
+     * @throws ErrorException Quando o arquivo já existe
+     * @return void
+     */
     public static function upload_file(UploadedFile $file) : void 
     {
-
         $path = Storage::disk(name: 'local')->put('uploads', $file);
         $hash = hash_file(algo: "sha256", filename: $file->getRealPath());
 
@@ -36,6 +57,7 @@ class Upload extends Model
 
         if (!$result->isEmpty()) {
             $store = Storage::disk('local')->delete(strval($path));
+            Log::debug("deletado arquivo", [$store]);
             throw new ErrorException('Arquivo existente');
         }
 
@@ -58,5 +80,7 @@ class Upload extends Model
         ]);
 
         ProcessDataConsolidateFile::dispatch($path, $listMimeType[$mimeType]);
+
+        Log::debug('mime Type', [$mimeType]);
     }
 }

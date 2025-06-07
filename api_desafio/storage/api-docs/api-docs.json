@@ -1,0 +1,307 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API de Upload de Arquivos",
+        "description": "API para upload e processamento de arquivos CSV e XLSX",
+        "contact": {
+            "email": "seu-email@exemplo.com"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/v1/consolidate": {
+            "get": {
+                "tags": [
+                    "Consolidate"
+                ],
+                "summary": "Lista dados consolidados",
+                "operationId": "ab29266b55928110ee11ac08686a29ce",
+                "responses": {
+                    "200": {
+                        "description": "Lista de dados consolidados",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "RptDt": {
+                                                        "type": "string",
+                                                        "format": "date"
+                                                    },
+                                                    "TckrSymb": {
+                                                        "type": "string"
+                                                    },
+                                                    "MktNm": {
+                                                        "type": "string"
+                                                    },
+                                                    "SctyCtgyNm": {
+                                                        "type": "string"
+                                                    },
+                                                    "ISIN": {
+                                                        "type": "string"
+                                                    },
+                                                    "CrpnNm": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/uploads": {
+            "get": {
+                "tags": [
+                    "Uploads"
+                ],
+                "summary": "Lista todos os uploads",
+                "operationId": "5eec42cd6a4f9201819b26a4b8831d54",
+                "responses": {
+                    "200": {
+                        "description": "Lista de uploads",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "file_path": {
+                                                        "type": "string"
+                                                    },
+                                                    "name_file": {
+                                                        "type": "string"
+                                                    },
+                                                    "date_upload": {
+                                                        "type": "string"
+                                                    },
+                                                    "hash_file": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Uploads"
+                ],
+                "summary": "Realiza upload de arquivo",
+                "operationId": "882319364a8115bfd357f6eff5dbfd59",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "file": {
+                                        "description": "Arquivo CSV ou XLSX (máx. 150MB)",
+                                        "type": "file"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Upload realizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "upload com sucesso"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro no upload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Arquivo inválido"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/uploads/{id}": {
+            "delete": {
+                "tags": [
+                    "Uploads"
+                ],
+                "summary": "Remove um upload",
+                "operationId": "72b76c35ef8b9b66b8f062da5364cc39",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do upload",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Upload removido com sucesso"
+                    },
+                    "404": {
+                        "description": "Upload não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Arquivo inexistente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ConsolidateFile": {
+                "title": "ConsolidateFile",
+                "description": "Modelo para armazenamento de dados consolidados de arquivos",
+                "properties": {
+                    "id": {
+                        "description": "ID único do registro",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "RptDt": {
+                        "description": "Data do relatório",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "TckrSymb": {
+                        "description": "Símbolo do ticker",
+                        "type": "string"
+                    },
+                    "MktNm": {
+                        "description": "Nome do mercado",
+                        "type": "string"
+                    },
+                    "SctyCtgyNm": {
+                        "description": "Categoria do título",
+                        "type": "string"
+                    },
+                    "ISIN": {
+                        "description": "Código ISIN",
+                        "type": "string"
+                    },
+                    "CrpnNm": {
+                        "description": "Nome da corporação",
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "description": "Data de criação do registro",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Data da última atualização do registro",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Upload": {
+                "title": "Upload",
+                "description": "Modelo para gerenciamento de uploads de arquivos",
+                "properties": {
+                    "id": {
+                        "description": "ID único do upload",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "file_path": {
+                        "description": "Caminho do arquivo no storage",
+                        "type": "string"
+                    },
+                    "name_file": {
+                        "description": "Nome original do arquivo",
+                        "type": "string"
+                    },
+                    "date_upload": {
+                        "description": "Data do upload",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "hash_file": {
+                        "description": "Hash SHA256 do arquivo para verificação de duplicidade",
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "description": "Data de criação do registro",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Data da última atualização do registro",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Consolidate",
+            "description": "Endpoints para dados consolidados"
+        },
+        {
+            "name": "Uploads",
+            "description": "Uploads"
+        }
+    ]
+}

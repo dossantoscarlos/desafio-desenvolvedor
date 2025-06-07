@@ -7,10 +7,38 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
+/**
+ * @OA\Tag(
+ *     name="Consolidate",
+ *     description="Endpoints para dados consolidados"
+ * )
+ */
 class ConsolidateFileController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/api/v1/consolidate",
+     *     summary="Lista dados consolidados",
+     *     tags={"Consolidate"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de dados consolidados",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="RptDt", type="string", format="date"),
+     *                     @OA\Property(property="TckrSymb", type="string"),
+     *                     @OA\Property(property="MktNm", type="string"),
+     *                     @OA\Property(property="SctyCtgyNm", type="string"),
+     *                     @OA\Property(property="ISIN", type="string"),
+     *                     @OA\Property(property="CrpnNm", type="string")
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
      */
     public function index(Request $request):JsonResponse
     {
